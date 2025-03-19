@@ -1,0 +1,23 @@
+
+
+
+
+#测试2025
+
+#训练，数据集是开源的，固定的，
+python train.py --model_architecture ds_cnn --model_size_info 5 64 10 4 2 2 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 --dct_coefficient_count 10 --window_size_ms 40 --window_stride_ms 20 --learning_rate 0.0005,0.0001,0.00002 --how_many_training_steps 1000,1000,1000 --summaries_dir work/DS_CNN/DS_CNN1/retrain_logs --train_dir work/DS_CNN/DS_CNN1/training
+
+#PB文件生成
+#ds_cnn_8780.ckpt-2800 名字是.meta的前缀
+python freeze.py --model_architecture ds_cnn --model_size_info 5 64 10 4 2 2 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 --dct_coefficient_count 10 --window_size_ms 40 --window_stride_ms 20 --checkpoint work/DS_CNN/DS_CNN1/training/best/ds_cnn_8780.ckpt-2800 --output_file work/DS_CNN/DS_CNN1/ds_cnn_1.pb 
+
+#测试识别
+python label_wav.py  --graph work/DS_CNN/DS_CNN1/ds_cnn_1.pb  --labels work/DS_CNN/DS_CNN1/training/ds_cnn_labels.txt --wav test_yes.wav
+
+#norm 
+python fold_batchnorm.py --model_architecture ds_cnn --model_size_info 5 64 10 4 2 2 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 --dct_coefficient_count 10 --window_size_ms 40 --window_stride_ms 20  --checkpoint work/DS_CNN/DS_CNN1/training/best/ds_cnn_8780.ckpt-2800 --act_max 32 0 0 0 0 0
+
+#quant flot->uint8 会生成 weight.h 给网络使用
+python quant_test.py --model_architecture ds_cnn --model_size_info 5 64 10 4 2 2 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 --dct_coefficient_count 10 --window_size_ms 40 --window_stride_ms 20  --checkpoint  work/DS_CNN/DS_CNN1/training/best/ds_cnn_8780.ckpt-2800_bnfused --act_max 32 0 0 0 0 0 0 0 0 0 0 0 
+
+python freeze.py --model_architecture ds_cnn --model_size_info 5 64 10 4 2 2 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 64 3 3 1 1 --dct_coefficient_count 10 --window_size_ms 40 --window_stride_ms 20 --checkpoint work/DS_CNN/DS_CNN1/training/best/ds_cnn_8780.ckpt-2800_bnfused --output_file work/DS_CNN/DS_CNN1/ds_cnn_1_q.pb 
