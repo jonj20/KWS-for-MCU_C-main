@@ -144,6 +144,8 @@ int MFCC_test(uint8_t* in_audio_buffer)
   //pc.printf("Total time : %d us\r\n",end-start);
   printf("Detected %s (%d%%)\r\n",output_class[max_ind],((int)kws->output[max_ind]*100/128));
 
+  KWS_free(kws);
+
   return max_ind;
 }
 #else
@@ -164,6 +166,9 @@ int MFCC_test()
   //pc.printf("Total time : %d us\r\n",end-start);
   printf("Detected %s (%d%%)\r\n",output_class[max_ind],((int)kws->output[max_ind]*100/128));
 
+  KWS_free(kws);
+
   return max_ind;
 }
+
 #endif
