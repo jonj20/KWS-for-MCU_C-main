@@ -1,0 +1,4 @@
+numpy
+six
+tensorflow-cpu=1.15.0
+python=3.7

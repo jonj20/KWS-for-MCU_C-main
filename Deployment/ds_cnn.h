@@ -36,7 +36,7 @@
 #define IN_DIM (NUM_FRAMES*NUM_MFCC_COEFFS)
 #define OUT_DIM 12
 
-#define CONV1_OUT_CH 64
+#define CONV1_OUT_CH 32
 #define CONV1_IN_X NUM_MFCC_COEFFS
 #define CONV1_IN_Y NUM_FRAMES
 #define CONV1_KX 4
@@ -50,7 +50,7 @@
 #define CONV1_BIAS_LSHIFT 2
 #define CONV1_OUT_RSHIFT 6
 
-#define CONV2_OUT_CH 64
+#define CONV2_OUT_CH 32
 #define CONV2_IN_X CONV1_OUT_X
 #define CONV2_IN_Y CONV1_OUT_Y
 #define CONV2_DS_KX 3
@@ -66,7 +66,7 @@
 #define CONV2_PW_BIAS_LSHIFT 4
 #define CONV2_PW_OUT_RSHIFT 8
 
-#define CONV3_OUT_CH 64
+#define CONV3_OUT_CH 32
 #define CONV3_IN_X CONV2_OUT_X
 #define CONV3_IN_Y CONV2_OUT_Y
 #define CONV3_DS_KX 3
@@ -82,7 +82,7 @@
 #define CONV3_PW_BIAS_LSHIFT 5
 #define CONV3_PW_OUT_RSHIFT 8
 
-#define CONV4_OUT_CH 64
+#define CONV4_OUT_CH 32
 #define CONV4_IN_X CONV3_OUT_X
 #define CONV4_IN_Y CONV3_OUT_Y
 #define CONV4_DS_KX 3
@@ -98,21 +98,21 @@
 #define CONV4_PW_BIAS_LSHIFT 5
 #define CONV4_PW_OUT_RSHIFT 7
 
-#define CONV5_OUT_CH 64
-#define CONV5_IN_X CONV4_OUT_X
-#define CONV5_IN_Y CONV4_OUT_Y
-#define CONV5_DS_KX 3
-#define CONV5_DS_KY 3
-#define CONV5_DS_SX 1
-#define CONV5_DS_SY 1
-#define CONV5_DS_PX 1
-#define CONV5_DS_PY 1
-#define CONV5_OUT_X CONV5_IN_X
-#define CONV5_OUT_Y CONV5_IN_Y
-#define CONV5_DS_BIAS_LSHIFT 3
-#define CONV5_DS_OUT_RSHIFT 5
-#define CONV5_PW_BIAS_LSHIFT 5
-#define CONV5_PW_OUT_RSHIFT 8
+// #define CONV5_OUT_CH 32
+// #define CONV5_IN_X CONV4_OUT_X
+// #define CONV5_IN_Y CONV4_OUT_Y
+// #define CONV5_DS_KX 3
+// #define CONV5_DS_KY 3
+// #define CONV5_DS_SX 1
+// #define CONV5_DS_SY 1
+// #define CONV5_DS_PX 1
+// #define CONV5_DS_PY 1
+// #define CONV5_OUT_X CONV5_IN_X
+// #define CONV5_OUT_Y CONV5_IN_Y
+// #define CONV5_DS_BIAS_LSHIFT 3
+// #define CONV5_DS_OUT_RSHIFT 5
+// #define CONV5_PW_BIAS_LSHIFT 5
+// #define CONV5_PW_OUT_RSHIFT 8
 
 #define FINAL_FC_BIAS_LSHIFT 2
 #define FINAL_FC_OUT_RSHIFT 7

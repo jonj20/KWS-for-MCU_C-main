@@ -32,17 +32,19 @@ const q7_t DS_CNN_conv4_ds_wt[CONV3_OUT_CH*CONV4_DS_KX*CONV4_DS_KY]=CONV4_DS_WT;
 const q7_t DS_CNN_conv4_ds_bias[CONV3_OUT_CH]=CONV4_DS_BIAS;
 const q7_t DS_CNN_conv4_pw_wt[CONV4_OUT_CH*CONV3_OUT_CH]=CONV4_PW_WT;
 const q7_t DS_CNN_conv4_pw_bias[CONV4_OUT_CH]=CONV4_PW_BIAS;
-const q7_t DS_CNN_conv5_ds_wt[CONV4_OUT_CH*CONV5_DS_KX*CONV5_DS_KY]=CONV5_DS_WT;
-const q7_t DS_CNN_conv5_ds_bias[CONV4_OUT_CH]=CONV5_DS_BIAS;
-const q7_t DS_CNN_conv5_pw_wt[CONV5_OUT_CH*CONV4_OUT_CH]=CONV5_PW_WT;
-const q7_t DS_CNN_conv5_pw_bias[CONV5_OUT_CH]=CONV5_PW_BIAS;
-const q7_t DS_CNN_final_fc_wt[CONV5_OUT_CH*OUT_DIM]=FINAL_FC_WT;
+// const q7_t DS_CNN_conv5_ds_wt[CONV4_OUT_CH*CONV5_DS_KX*CONV5_DS_KY]=CONV5_DS_WT;
+// const q7_t DS_CNN_conv5_ds_bias[CONV4_OUT_CH]=CONV5_DS_BIAS;
+// const q7_t DS_CNN_conv5_pw_wt[CONV5_OUT_CH*CONV4_OUT_CH]=CONV5_PW_WT;
+// const q7_t DS_CNN_conv5_pw_bias[CONV5_OUT_CH]=CONV5_PW_BIAS;
+const q7_t DS_CNN_final_fc_wt[CONV4_OUT_CH*OUT_DIM]=FINAL_FC_WT; //const q7_t DS_CNN_final_fc_wt[CONV5_OUT_CH*OUT_DIM]=FINAL_FC_WT;
 const q7_t DS_CNN_final_fc_bias[OUT_DIM]=FINAL_FC_BIAS;
+
+q7_t scratch_buf[SCRATCH_BUFFER_SIZE] = {0};
 
 DS_CNN* DS_CNN_create()
 {
   DS_CNN* nn = malloc(sizeof(DS_CNN));
-  nn->scratch_pad = malloc(sizeof(q7_t)*SCRATCH_BUFFER_SIZE);
+  nn->scratch_pad = scratch_buf;//malloc(sizeof(q7_t)*SCRATCH_BUFFER_SIZE);
   nn->buffer1 = nn->scratch_pad;
   nn->buffer2 = nn->buffer1 + (CONV1_OUT_CH*CONV1_OUT_X*CONV1_OUT_Y);
   nn->col_buffer = nn->buffer2 + (CONV2_OUT_CH*CONV2_OUT_X*CONV2_OUT_Y);
@@ -58,7 +60,7 @@ DS_CNN* DS_CNN_create()
 
 DS_CNN_free(DS_CNN* nn)
 {
-  free(nn->scratch_pad);
+  //free(nn->scratch_pad);
   
   free(nn);
 }
@@ -143,25 +145,25 @@ void DS_CNN_run_nn(DS_CNN* nn, q7_t* in_data, q7_t* out_data)
     nn->buffer1, CONV4_OUT_X, CONV4_OUT_Y, (q15_t*)nn->col_buffer, NULL);
   arm_relu_q7(nn->buffer1,CONV4_OUT_X*CONV4_OUT_Y*CONV4_OUT_CH);
 
-  //CONV5 : DS + PW conv
-  //Depthwise separable conv (batch norm params folded into conv wts/bias)
-  arm_depthwise_separable_conv_HWC_q7_nonsquare(nn->buffer1,CONV5_IN_X,CONV5_IN_Y,CONV4_OUT_CH,
-    DS_CNN_conv5_ds_wt,CONV4_OUT_CH,CONV5_DS_KX,CONV5_DS_KY,CONV5_DS_PX,CONV5_DS_PY,CONV5_DS_SX,CONV5_DS_SY,
-    DS_CNN_conv5_ds_bias,CONV5_DS_BIAS_LSHIFT,CONV5_DS_OUT_RSHIFT,
-    nn->buffer2,CONV5_OUT_X,CONV5_OUT_Y,(q15_t*)nn->col_buffer, NULL);
-  arm_relu_q7(nn->buffer2,CONV5_OUT_X*CONV5_OUT_Y*CONV5_OUT_CH);
-  //Pointwise conv
-  arm_convolve_1x1_HWC_q7_fast_nonsquare(nn->buffer2, CONV5_OUT_X, CONV5_OUT_Y, CONV4_OUT_CH, 
-    DS_CNN_conv5_pw_wt, CONV5_OUT_CH, 1, 1, 0, 0, 1, 1, 
-    DS_CNN_conv5_pw_bias, CONV5_PW_BIAS_LSHIFT, CONV5_PW_OUT_RSHIFT, 
-    nn->buffer1, CONV5_OUT_X, CONV5_OUT_Y, (q15_t*)nn->col_buffer, NULL);
-  arm_relu_q7(nn->buffer1,CONV5_OUT_X*CONV5_OUT_Y*CONV5_OUT_CH);
+  // //CONV5 : DS + PW conv
+  // //Depthwise separable conv (batch norm params folded into conv wts/bias)
+  // arm_depthwise_separable_conv_HWC_q7_nonsquare(nn->buffer1,CONV5_IN_X,CONV5_IN_Y,CONV4_OUT_CH,
+  //   DS_CNN_conv5_ds_wt,CONV4_OUT_CH,CONV5_DS_KX,CONV5_DS_KY,CONV5_DS_PX,CONV5_DS_PY,CONV5_DS_SX,CONV5_DS_SY,
+  //   DS_CNN_conv5_ds_bias,CONV5_DS_BIAS_LSHIFT,CONV5_DS_OUT_RSHIFT,
+  //   nn->buffer2,CONV5_OUT_X,CONV5_OUT_Y,(q15_t*)nn->col_buffer, NULL);
+  // arm_relu_q7(nn->buffer2,CONV5_OUT_X*CONV5_OUT_Y*CONV5_OUT_CH);
+  // //Pointwise conv
+  // arm_convolve_1x1_HWC_q7_fast_nonsquare(nn->buffer2, CONV5_OUT_X, CONV5_OUT_Y, CONV4_OUT_CH, 
+  //   DS_CNN_conv5_pw_wt, CONV5_OUT_CH, 1, 1, 0, 0, 1, 1, 
+  //   DS_CNN_conv5_pw_bias, CONV5_PW_BIAS_LSHIFT, CONV5_PW_OUT_RSHIFT, 
+  //   nn->buffer1, CONV5_OUT_X, CONV5_OUT_Y, (q15_t*)nn->col_buffer, NULL);
+  // arm_relu_q7(nn->buffer1,CONV5_OUT_X*CONV5_OUT_Y*CONV5_OUT_CH);
 
   //Average pool
-  arm_avepool_q7_HWC_nonsquare (nn->buffer1,CONV5_OUT_X,CONV5_OUT_Y,CONV5_OUT_CH,CONV5_OUT_X,CONV5_OUT_Y,
+  arm_avepool_q7_HWC_nonsquare (nn->buffer1,CONV4_OUT_X,CONV4_OUT_Y,CONV4_OUT_CH,CONV4_OUT_X,CONV4_OUT_Y,
     0,0,1,1,1,1,NULL,nn->buffer2, 2);
 
-  arm_fully_connected_q7(nn->buffer2, DS_CNN_final_fc_wt, CONV5_OUT_CH, OUT_DIM, 
+  arm_fully_connected_q7(nn->buffer2, DS_CNN_final_fc_wt, CONV4_OUT_CH, OUT_DIM, 
     FINAL_FC_BIAS_LSHIFT, FINAL_FC_OUT_RSHIFT, DS_CNN_final_fc_bias, out_data, (q15_t*)nn->col_buffer);
 
 }

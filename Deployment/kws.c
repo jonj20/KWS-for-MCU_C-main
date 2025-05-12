@@ -18,6 +18,7 @@
 
 
 #include "kws.h"
+#include "test_pcm.h"
 
 KWS* KWS_create_1(int record_win, int sliding_win_len)
 {
@@ -127,10 +128,30 @@ void KWS_average_predictions(KWS* kws)
 }
   
 
-#if 1
+#if 0
 int MFCC_test(uint8_t* in_audio_buffer)
 {
   const char output_class[12][8] = {"Silence", "Unknown","yes","no","up","down","left","right","on","off","stop","go"};
+  KWS* kws = KWS_create_2(in_audio_buffer);
+
+  //T.start();
+  //int start=T.read_us();
+  KWS_extract_features(kws); //extract mfcc features
+  KWS_classify(kws);	  //classify using dnn
+  //int end=T.read_us();
+  //T.stop();
+  int max_ind = KWS_get_top_class(kws, kws->output);
+  //pc.printf("Total time : %d us\r\n",end-start);
+  printf("Detected %s (%d%%)\r\n",output_class[max_ind],((int)kws->output[max_ind]*100/128));
+
+  return max_ind;
+}
+#else
+
+int MFCC_test()
+{
+  const char output_class[12][8] = {"Silence", "Unknown","yes","no","up","down","left","right","on","off","stop","go"};
+  uint16_t* in_audio_buffer =  (uint16_t*)test_pcm;
   KWS* kws = KWS_create_2(in_audio_buffer);
 
   //T.start();

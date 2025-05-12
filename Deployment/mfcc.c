@@ -57,6 +57,7 @@ MFCC* MFCC_create(int num_mfcc_features, int frame_len, int mfcc_dec_bits)
   mfcc->rfft = malloc(sizeof(arm_rfft_fast_instance_f32));
   arm_rfft_fast_init_f32(mfcc->rfft, mfcc->frame_len_padded);
 
+  return mfcc;
 }
 
 void MFCC_free(MFCC* mfcc) {
