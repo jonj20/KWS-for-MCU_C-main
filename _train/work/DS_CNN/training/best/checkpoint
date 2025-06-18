@@ -1,0 +1,2 @@
+model_checkpoint_path: "ds_cnn_8980.ckpt-7600_bnfused_bnfused"
+all_model_checkpoint_paths: "ds_cnn_8980.ckpt-7600_bnfused_bnfused"

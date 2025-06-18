@@ -1,58 +1,70 @@
-在原工程下尝试用C实现部署。
 
 # Keyword spotting for Microcontrollers 
 
-This repository consists of the tensorflow models and training scripts used 
-in the paper: 
-[Hello Edge: Keyword spotting on Microcontrollers](https://arxiv.org/pdf/1711.07128.pdf). 
-The scripts are adapted from [Tensorflow examples](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/examples/speech_commands) 
-and some are repeated here for the sake of making these scripts self-contained.
+## test 
+main()
+{
+    void* test_pcm = wav_arrary;
+    MFCC_test(test_pcm);
+}
 
-To train a DNN with 3 fully-connected layers with 128 neurons in each layer, run:
 
-```
-python train.py --model_architecture dnn --model_size_info 128 128 128 
-```
-The command line argument *--model_size_info* is used to pass the neural network layer
-dimensions such as number of layers, convolution filter size/stride as a list to models.py, 
-which builds the tensorflow graph based on the provided model architecture 
-and layer dimensions. 
-For more info on *model_size_info* for each network architecture see 
-[models.py](models.py).
-The training commands with all the hyperparameters to reproduce the models shown in the 
-[paper](https://arxiv.org/pdf/1711.07128.pdf) are given [here](train_commands.txt).
 
-To run inference on the trained model from a checkpoint on train/val/test set, run:
-```
-python test.py --model_architecture dnn --model_size_info 128 128 128 --checkpoint 
-<checkpoint path>
-```
+## train 
 
-To freeze the trained model checkpoint into a .pb file, run:
-```
-python freeze.py --model_architecture dnn --model_size_info 128 128 128 --checkpoint 
-<checkpoint path> --output_file dnn.pb
-```
+#############
+modify common.sh 
 
-## Pretrained models
+MODEL_SIZE_INFO="5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1"
+DCT_CNT=10
+WIN_SIZE=20
+WIN_STRIDE=10
 
-Trained models (.pb files) for different neural network architectures such as DNN,
-CNN, Basic LSTM, LSTM, GRU, CRNN and DS-CNN shown in 
-this [arXiv paper](https://arxiv.org/pdf/1711.07128.pdf) are added in 
-[Pretrained_models](Pretrained_models). Accuracy of the models on validation set, 
-their memory requirements and operations per inference are also summarized in the 
-following table.
+then,
 
-<img src="https://user-images.githubusercontent.com/34459978/34018008-0451ef9a-e0dd-11e7-9661-59e4fb4a8347.png">
+sh train.sh 
+or
+python train.py       --data_url=   --data_dir=../speech_data   --wanted_words yes,no,up,down,left,right,on,off,stop,go   --clip_duration_ms 1000   --model_architecture ds_cnn   --testing_percentage 10   --validation_percentage 10   --training_percentage 80   --unknown_percentage 50      --model_size_info 5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1   --dct_coefficient_count 10   --window_size_ms 40   --window_stride_ms 20     --summaries_dir work/DS_CNN/logs --train_dir work/DS_CNN/training
 
-To run an audio file through the trained model (e.g. a DNN) and get top prediction, 
-run:
-```
-python label_wav.py --wav <audio file> --graph Pretrained_models/DNN/DNN_S.pb 
---labels Pretrained_models/labels.txt --how_many_labels 1
-```
+sh test.sh 
+or
+python test.py    --data_url=   --data_dir=../speech_data   --wanted_words yes,no,up,down,left,right,on,off,stop,go   --clip_duration_ms 1000   --model_architecture ds_cnn   --testing_percentage 10   --validation_percentage 10   --training_percentage 80   --unknown_percentage 50      --model_size_info 5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1   --dct_coefficient_count 10   --window_size_ms 40   --window_stride_ms 20   --checkpoint work/DS_CNN/training/best/ds_cnn_9338.ckpt-8000
 
-## Quantization Guide and Deployment on Microcontrollers
+sh freeze.sh 
+or
+python freeze.py    --data_url=   --data_dir=../speech_data   --wanted_words yes,no,up,down,left,right,on,off,stop,go   --clip_duration_ms 1000   --model_architecture ds_cnn   --testing_percentage 10   --validation_percentage 10   --training_percentage 80   --unknown_percentage 50      --model_size_info 5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1   --dct_coefficient_count 10   --window_size_ms 40   --window_stride_ms 20   --checkpoint work/DS_CNN/training/best/ds_cnn_9338.ckpt-8000 --output_file work/DS_CNN/ds_cnn.pb
 
-A quick guide on quantizing the KWS neural network models is [here](Deployment/Quant_guide.md). 
-The example code for running a DNN model on a Cortex-M development board is also provided [here](Deployment). 
+
+sh label_wav.sh 
+or
+python label_wav.py --wav left.wav --graph work/DS_CNN/ds_cnn.pb --labels work/DS_CNN/training/ds_cnn_labels.txt --how_many_labels 1
+python label_wav.py --wav test_yes.wav --graph work/DS_CNN/ds_cnn.pb --labels work/DS_CNN/training/ds_cnn_labels.txt --how_many_labels 1
+
+## quant
+
+sh fold_batchnorm.sh 
+or
+python fold_batchnorm.py    --data_url=   --data_dir=../speech_data   --wanted_words yes,no,up,down,left,right,on,off,stop,go   --clip_duration_ms 1000   --model_architecture ds_cnn   --testing_percentage 10   --validation_percentage 10   --training_percentage 80   --unknown_percentage 50      --model_size_info 5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1   --dct_coefficient_count 10   --window_size_ms 40   --window_stride_ms 20     --checkpoint work/DS_CNN/training/best/ds_cnn_9338.ckpt-8000
+
+sh quant_test.sh 
+or
+ python quant_test.py       --data_url=   --data_dir=../speech_data   --wanted_words yes,no,up,down,left,right,on,off,stop,go   --clip_duration_ms 1000   --model_architecture ds_cnn   --testing_percentage 10   --validation_percentage 10   --training_percentage 80   --unknown_percentage 50      --model_size_info 5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1   --dct_coefficient_count 10   --window_size_ms 40   --window_stride_ms 20     --act_max 0 0 0 0 0 0 0 0 0 0 0 0  --checkpoint work/DS_CNN/training/best/ds_cnn_9338.ckpt-8000_bnfused
+
+
+<!-- python quant_dump.py       --data_url=   --data_dir=../speech_data   --wanted_words yes,no,up,down,left,right,on,off,stop,go   --clip_duration_ms 1000   --model_architecture ds_cnn   --testing_percentage 10   --validation_percentage 10   --training_percentage 80   --unknown_percentage 50      --model_size_info 5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1   --dct_coefficient_count 10   --window_size_ms 40   --window_stride_ms 20     --act_max 0 0 0 0 0 0 0 0 0 0 0 0  --checkpoint work/DS_CNN/training/best/ds_cnn_9338.ckpt-8000_bnfused -->
+
+#test  32, 4, 16, 8, 8, 4, 8, 8, 32, 32, 4, 8
+sh quant_dump.sh 
+or
+python quant_dump.py       --data_url=   --data_dir=../speech_data   --wanted_words yes,no,up,down,left,right,on,off,stop,go   --clip_duration_ms 1000   --model_architecture ds_cnn   --testing_percentage 10   --validation_percentage 10   --training_percentage 80   --unknown_percentage 50      --model_size_info 5 32 10 4 2 2 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1 32 3 3 1 1   --dct_coefficient_count 10   --window_size_ms 40   --window_stride_ms 20     --act_max 32 4 16 8 8 4 8 8 32 32 4 8  --checkpoint work/DS_CNN/training/best/ds_cnn_9338.ckpt-8000_bnfused
+
+hill generate c code
+
+## C deployment
+copy ds_cnn.h ds_cnn.h ds_cnn_weights.h to project.
+
+
+## Test
+
+
+
